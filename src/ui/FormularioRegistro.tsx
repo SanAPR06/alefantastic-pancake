@@ -1,15 +1,15 @@
 import { useMemo, useState } from 'react';
 import {
-  IDIOMAS, calcularUnidades, cantidadRango, descripcionRango, dinero, hoy, nuevoId, totalRegistro,
+  IDIOMAS, calcularUnidades, sumarDias, cantidadRango, descripcionRango, dinero, hoy, nuevoId,
 } from '../domain/calc';
 import type { Ajustes, Categoria, Idioma, Registro } from '../domain/types';
 import { guardarRegistro } from '../data/db';
 
 const CATEGORIAS: { id: Categoria; nombre: string }[] = [
-  { id: 'subtitulos', nombre: 'Subtítulos' },
-  { id: 'horas', nombre: 'Horas' },
-  { id: 'metadata', nombre: 'Metadata' },
-  { id: 'presentacion', nombre: 'Presentación' },
+  { id: 'subtitulos', nombre: '📝 Subtítulos' },
+  { id: 'horas', nombre: '⏱ Horas' },
+  { id: 'metadata', nombre: '🏷 Metadata' },
+  { id: 'presentacion', nombre: '🎞 Presentación' },
 ];
 
 interface Props {
@@ -129,7 +129,7 @@ export function FormularioRegistro({ ajustes, historial, editando, onGuardado }:
       return;
     }
     await guardarRegistro(r);
-    setAviso(`✓ Guardado (${dinero(totalRegistro(r, ajustes))})`);
+    setAviso(`✓ Listo, se guardó: ${r.programa}${r.descripcion ? ' — ' + r.descripcion : ''}${r.horas && r.categoria === 'horas' ? ` (${r.horas} h)` : ''}`);
     onGuardado?.(r);
     if (!e) {
       // Se mantienen programa, tipo e idiomas para registrar el siguiente rápido.
@@ -162,8 +162,6 @@ export function FormularioRegistro({ ajustes, historial, editando, onGuardado }:
     setHoras(c === 'horas' ? '1' : '');
   }
 
-  const vistaPrevia = construir();
-
   return (
     <form className="formulario" onSubmit={guardar}>
       {!e && (
@@ -180,20 +178,24 @@ export function FormularioRegistro({ ajustes, historial, editando, onGuardado }:
         </div>
       )}
 
-      <label>
-        Fecha
-        <input type="date" value={fecha} onChange={(x) => setFecha(x.target.value)} required />
-      </label>
+      <div className="campo">
+        <span className="pregunta">¿De qué día fue?</span>
+        <div className="chips">
+          <button type="button" className={fecha === hoy() ? 'activo' : ''} onClick={() => setFecha(hoy())}>Hoy</button>
+          <button type="button" className={fecha === sumarDias(hoy(), -1) ? 'activo' : ''} onClick={() => setFecha(sumarDias(hoy(), -1))}>Ayer</button>
+          <input type="date" value={fecha} onChange={(x) => setFecha(x.target.value)} required aria-label="Otro día" />
+        </div>
+      </div>
 
       {categoria === 'subtitulos' && (
         <>
           <label>
-            Programa
-            <input list="programas" value={programa} onChange={(x) => setPrograma(x.target.value)} placeholder="La llorona" />
+            <span className="pregunta">¿De qué programa o serie?</span>
+            <input list="programas" value={programa} onChange={(x) => setPrograma(x.target.value)} placeholder="Ej: La llorona" />
           </label>
 
           <div className="campo">
-            <span>Tipo de trabajo</span>
+            <span className="pregunta">¿Qué trabajo hiciste?</span>
             <div className="chips">
               {ajustes.tipos.map((t) => (
                 <button
@@ -210,26 +212,26 @@ export function FormularioRegistro({ ajustes, historial, editando, onGuardado }:
           {tipo?.porRango ? (
             <div className="fila">
               <label>
-                Del episodio
+                Desde el episodio
                 <input inputMode="numeric" value={desde} placeholder={String(siguienteEp)}
                   onChange={(x) => { setDesde(x.target.value); setUnidadesManual(null); setDescManual(null); }} />
               </label>
               <label>
-                Al episodio
-                <input inputMode="numeric" value={hasta} placeholder="(solo uno)"
+                Hasta el episodio
+                <input inputMode="numeric" value={hasta} placeholder="vacío si fue solo uno"
                   onChange={(x) => { setHasta(x.target.value); setUnidadesManual(null); setDescManual(null); }} />
               </label>
             </div>
           ) : (
             <label>
-              Cantidad
+              ¿Cuántos?
               <input inputMode="numeric" value={cantidad}
                 onChange={(x) => { setCantidad(x.target.value); setUnidadesManual(null); }} />
             </label>
           )}
 
           <div className="campo">
-            <span>Idiomas</span>
+            <span className="pregunta">¿En qué idioma?</span>
             <div className="chips">
               {IDIOMAS.map((i) => (
                 <button type="button" key={i.id} className={idiomas.includes(i.id) ? 'activo' : ''} onClick={() => toggleIdioma(i.id)}>
@@ -241,19 +243,20 @@ export function FormularioRegistro({ ajustes, historial, editando, onGuardado }:
 
           <details className="avanzado" open={!!e}>
             <summary>
-              {descripcion || '—'} · {unidades} × {dinero(precio)} = <b>{dinero(unidades * precio)}</b> <small>(editar)</small>
+              <span>Se anotará: <b>{programa || '…'} — {descripcion || '…'}</b></span>
+              <small>{unidades} × {dinero(precio)} = {dinero(unidades * precio)} · tocar para cambiar los detalles</small>
             </summary>
             <label>
-              Texto en columna "Episodio"
+              Texto que saldrá en el Excel (columna Episodio)
               <input value={descripcion} onChange={(x) => setDescManual(x.target.value)} />
             </label>
             <div className="fila">
               <label>
-                Number of eps
+                Cantidad total (episodios × idiomas)
                 <input inputMode="decimal" value={unidadesManual ?? String(unidades)} onChange={(x) => setUnidadesManual(x.target.value)} />
               </label>
               <label>
-                Precio por unidad
+                Precio de cada uno
                 <input inputMode="decimal" value={precioManual ?? String(precio)} onChange={(x) => setPrecioManual(x.target.value)} />
               </label>
             </div>
@@ -268,7 +271,7 @@ export function FormularioRegistro({ ajustes, historial, editando, onGuardado }:
       {categoria === 'horas' && (
         <>
           <label>
-            Horas
+            <span className="pregunta">¿Cuántas horas trabajaste?</span>
             <input inputMode="decimal" value={horas} onChange={(x) => setHoras(x.target.value)} />
           </label>
           <div className="chips">
@@ -277,7 +280,7 @@ export function FormularioRegistro({ ajustes, historial, editando, onGuardado }:
             ))}
           </div>
           <label>
-            Actividad
+            ¿En qué actividad?
             <input list="actividades" value={actividad} onChange={(x) => setActividad(x.target.value)} />
           </label>
           <p className="ayuda">Tarifa: {dinero(ajustes.tarifaHora)} / hora (se cambia en Ajustes)</p>
@@ -287,11 +290,11 @@ export function FormularioRegistro({ ajustes, historial, editando, onGuardado }:
       {(categoria === 'metadata' || categoria === 'presentacion') && (
         <>
           <label>
-            {categoria === 'metadata' ? 'Programa' : 'Nombre de la presentación'}
+            <span className="pregunta">{categoria === 'metadata' ? '¿De qué programa?' : '¿Cómo se llama la presentación?'}</span>
             <input list="programas" value={programa} onChange={(x) => setPrograma(x.target.value)} />
           </label>
           <label>
-            Monto (sugerido, cámbialo si este varía)
+            ¿De cuánto es? (cámbialo si es distinto)
             <input inputMode="decimal" value={monto}
               placeholder={String(montoPorDefecto)}
               onChange={(x) => setMonto(x.target.value)} />
@@ -304,7 +307,7 @@ export function FormularioRegistro({ ajustes, historial, editando, onGuardado }:
       )}
 
       <label>
-        Nota (opcional, no sale en el Excel)
+        Nota personal (opcional, no sale en el Excel)
         <input value={nota} onChange={(x) => setNota(x.target.value)} />
       </label>
 
@@ -314,10 +317,9 @@ export function FormularioRegistro({ ajustes, historial, editando, onGuardado }:
       </datalist>
 
       <button type="submit" className="primario">
-        {e ? 'Guardar cambios' : 'Guardar'}
-        {typeof vistaPrevia !== 'string' && ` · ${dinero(totalRegistro(vistaPrevia, ajustes))}`}
+        {e ? 'Guardar cambios' : '✓ Guardar este trabajo'}
       </button>
-      {aviso && <p className={aviso.startsWith('✓') ? 'ok' : 'error'}>{aviso}</p>}
+      {aviso && <p role="status" className={aviso.startsWith('✓') ? 'ok aviso' : 'error aviso'}>{aviso}</p>}
     </form>
   );
 }

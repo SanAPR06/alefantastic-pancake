@@ -32,7 +32,7 @@ export function ListaRegistros({ registros, historial, ajustes, vacio = 'No hay 
   if (!registros.length) return <p className="ayuda">{vacio}</p>;
 
   async function borrar(r: Registro) {
-    if (!confirm(`¿Borrar "${r.programa} — ${detalle(r)}"?`)) return;
+    if (!confirm(`¿Seguro que quieres borrar este trabajo?\n\n${r.programa} — ${detalle(r)}`)) return;
     await borrarRegistro(r.id);
   }
 
@@ -46,7 +46,7 @@ export function ListaRegistros({ registros, historial, ajustes, vacio = 'No hay 
         editandoId === r.id ? (
           <li key={r.id} className="editando">
             <FormularioRegistro ajustes={ajustes} historial={historial} editando={r} onGuardado={() => setEditandoId(null)} />
-            <button type="button" onClick={() => setEditandoId(null)}>Cancelar</button>
+            <button type="button" onClick={() => setEditandoId(null)}>Cancelar, no cambiar nada</button>
           </li>
         ) : (
           <li key={r.id}>
@@ -57,9 +57,9 @@ export function ListaRegistros({ registros, historial, ajustes, vacio = 'No hay 
             </div>
             <div className="monto">{dinero(totalRegistro(r, ajustes))}</div>
             <div className="acciones">
-              <button type="button" title="Repetir hoy" onClick={() => repetir(r)}>↻</button>
-              <button type="button" title="Editar" onClick={() => setEditandoId(r.id)}>✎</button>
-              <button type="button" title="Borrar" onClick={() => borrar(r)}>✕</button>
+              <button type="button" onClick={() => setEditandoId(r.id)}>Cambiar</button>
+              <button type="button" onClick={() => repetir(r)}>Repetir hoy</button>
+              <button type="button" className="peligro" onClick={() => borrar(r)}>Borrar</button>
             </div>
           </li>
         ),

@@ -134,3 +134,26 @@ label.check { flex-direction: row; align-items: center; flex: none; white-space:
 }
 
 .version { position: fixed; right: 8px; bottom: 6px; font-size: .7rem; color: var(--suave); opacity: .7; pointer-events: none; }
+
+/* ---- Pensado para personas poco familiarizadas con la tecnología ---- */
+:root { font-size: 18px; }
+button, input { min-height: 48px; }
+input[type='checkbox'] { min-height: 0; width: 22px; height: 22px; }
+button { font-weight: 500; }
+nav button { padding: 10px 2px; font-size: .85rem; line-height: 1.2; }
+h2 { font-size: 1.15rem; }
+.pregunta { color: var(--texto); font-weight: 600; font-size: 1rem; }
+.chips button { min-height: 44px; padding: 8px 14px; }
+.chips input[type='date'] { width: auto; flex: 1; min-width: 150px; }
+.segmentos button { min-height: 56px; font-weight: 600; }
+.avanzado summary { display: flex; flex-direction: column; gap: 2px; border: 1px dashed var(--borde); border-radius: 8px; padding: 10px 12px; color: var(--texto); }
+.aviso { font-size: 1.05rem; font-weight: 600; padding: 12px 14px; border-radius: 8px; background: color-mix(in srgb, var(--ok) 15%, transparent); }
+.aviso.error { background: color-mix(in srgb, var(--error) 15%, transparent); }
+.bienvenida ol { margin: 0; padding-left: 1.3rem; display: flex; flex-direction: column; gap: 6px; }
+.alerta { border-color: #d9a400; background: color-mix(in srgb, #d9a400 12%, var(--tarjeta)); }
+.alerta p { margin: 4px 0 10px; }
+.lista li { flex-wrap: wrap; }
+.lista .acciones { width: 100%; gap: 8px; padding-left: 54px; }
+.lista .acciones button { border: 1px solid var(--borde); background: var(--tarjeta); color: var(--texto); min-height: 40px; padding: 4px 12px; font-size: .85rem; }
+.lista .acciones button.peligro { color: var(--error); }
+.lista .info small { white-space: normal; }

@@ -59,7 +59,7 @@ export function Resumen({ registros, periodos, ajustes }: Props) {
       alert(`Estas fechas se cruzan con el periodo cerrado "${solapado.nombre}".`);
       return;
     }
-    if (!confirm(`¿Cerrar el periodo "${nombreFinal}" (${desde} a ${hasta}) por ${dinero(total)}?\nLo siguiente que registres irá al periodo nuevo.`)) return;
+    if (!confirm(`¿Terminar el periodo "${nombreFinal}"?\n\nLo que anotes de ahora en adelante irá a un periodo nuevo. No se borra nada.`)) return;
     await guardarPeriodo({ id: nuevoId(), nombre: nombreFinal, desde, hasta, cerradoEn: Date.now() });
   }
 
@@ -73,7 +73,8 @@ export function Resumen({ registros, periodos, ajustes }: Props) {
   return (
     <div className="resumen">
       <section className="tarjeta">
-        <h2>Generar resumen</h2>
+        <h2>📄 Mi Excel del periodo</h2>
+        <p className="ayuda">1. Revisa las fechas → 2. Mira el total → 3. Toca “Descargar mi Excel”.</p>
         <div className="fila">
           <label>
             Desde
@@ -85,7 +86,7 @@ export function Resumen({ registros, periodos, ajustes }: Props) {
           </label>
         </div>
         <label>
-          Nombre del periodo (nombre de la hoja)
+          Nombre del periodo (así se llamará la hoja)
           <input value={nombreFinal} onChange={(e) => setNombre(e.target.value)} />
         </label>
 
@@ -106,16 +107,17 @@ export function Resumen({ registros, periodos, ajustes }: Props) {
           type="button" className="primario" disabled={generando || !delPeriodo.length}
           onClick={() => exportar([{ nombre: nombreFinal, desde, hasta }], `${prefijo}Subtitulos ${nombreFinal}.xlsx`)}
         >
-          {generando ? 'Generando…' : 'Descargar Excel'}
+          {generando ? 'Preparando tu Excel…' : '⬇ Descargar mi Excel'}
         </button>
         <button type="button" disabled={!delPeriodo.length} onClick={cerrar}>
-          Cerrar periodo (marcar como cobrado)
+          ✔ Ya terminé este periodo, empezar uno nuevo
         </button>
+        <p className="ayuda">Úsalo después de descargar tu Excel. No borra nada: solo separa lo que ya entregaste de lo nuevo.</p>
       </section>
 
       <section className="tarjeta">
-        <h2>Periodos cerrados</h2>
-        {!periodos.length && <p className="ayuda">Todavía no hay periodos cerrados.</p>}
+        <h2>Periodos anteriores</h2>
+        {!periodos.length && <p className="ayuda">Aquí aparecerán los periodos que ya terminaste, por si necesitas descargar su Excel otra vez.</p>}
         <ul className="lista">
           {periodos.map((p) => {
             const t = totalRegistros(registros.filter((r) => enRango(r, p.desde, p.hasta)), ajustes);
@@ -127,10 +129,8 @@ export function Resumen({ registros, periodos, ajustes }: Props) {
                 </div>
                 <div className="monto">{dinero(t)}</div>
                 <div className="acciones">
-                  <button type="button" title="Descargar Excel"
-                    onClick={() => exportar([p], `${prefijo}Subtitulos ${p.nombre}.xlsx`)}>⤓</button>
-                  <button type="button" title="Reabrir periodo"
-                    onClick={() => confirm(`¿Reabrir "${p.nombre}"? Los registros no se borran.`) && borrarPeriodo(p.id)}>↺</button>
+                  <button type="button" onClick={() => exportar([p], `${prefijo}Subtitulos ${p.nombre}.xlsx`)}>Descargar Excel</button>
+                  <button type="button" onClick={() => confirm(`¿Volver a abrir "${p.nombre}"? No se borra nada.`) && borrarPeriodo(p.id)}>Volver a abrir</button>
                 </div>
               </li>
             );
@@ -138,7 +138,7 @@ export function Resumen({ registros, periodos, ajustes }: Props) {
         </ul>
         {periodos.length > 1 && (
           <button type="button" onClick={() => exportar([...periodos].reverse(), `${prefijo}Historial completo.xlsx`)}>
-            Descargar todos en un solo Excel
+            Descargar todos los periodos en un solo Excel
           </button>
         )}
       </section>

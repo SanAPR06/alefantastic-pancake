@@ -3,6 +3,7 @@ import { TIPOS_POR_DEFECTO, hoy, nuevoId } from '../domain/calc';
 import type { Ajustes, TipoTrabajo } from '../domain/types';
 import { crearRespaldo, guardarAjustes, restaurarRespaldo, type Respaldo } from '../data/db';
 import { descargarBlob } from '../export/descargar';
+import { marcarRespaldoHecho } from './respaldo';
 
 export function AjustesPagina({ ajustes }: { ajustes: Ajustes }) {
   const [borrador, setBorrador] = useState(ajustes);
@@ -26,6 +27,8 @@ export function AjustesPagina({ ajustes }: { ajustes: Ajustes }) {
   async function exportarRespaldo() {
     const r = await crearRespaldo();
     descargarBlob(new Blob([JSON.stringify(r, null, 2)], { type: 'application/json' }), `respaldo-trabajo-${hoy()}.json`);
+    marcarRespaldoHecho();
+    setAviso('✓ Copia descargada. Guárdala en un lugar seguro (por ejemplo, tu correo o una USB).');
   }
 
   async function importarRespaldo(archivo: File | undefined) {
@@ -45,32 +48,32 @@ export function AjustesPagina({ ajustes }: { ajustes: Ajustes }) {
   return (
     <div className="resumen">
       <section className="tarjeta">
-        <h2>General</h2>
+        <h2>Datos generales</h2>
         <label>
-          Tu nombre (va en el nombre del archivo)
+          Tu nombre (aparece en el nombre del Excel)
           <input value={borrador.nombreEmpleado} onChange={(e) => setBorrador({ ...borrador, nombreEmpleado: e.target.value })} />
         </label>
         <div className="fila">
           <label>
-            Tarifa por hora
+            Pago por hora
             <input inputMode="decimal" defaultValue={borrador.tarifaHora} key={'h' + ajustes.tarifaHora}
               onChange={(e) => setBorrador({ ...borrador, tarifaHora: num(e.target.value) })} />
           </label>
           <label>
-            Monto metadata
+            Pago por metadata
             <input inputMode="decimal" defaultValue={borrador.montoMetadata} key={'m' + ajustes.montoMetadata}
               onChange={(e) => setBorrador({ ...borrador, montoMetadata: num(e.target.value) })} />
           </label>
         </div>
         <label>
-          Precio sugerido de presentación
+          Pago sugerido por presentación
           <input inputMode="decimal" defaultValue={borrador.montoPresentacion ?? 20} key={'p' + ajustes.montoPresentacion}
             onChange={(e) => setBorrador({ ...borrador, montoPresentacion: num(e.target.value) })} />
         </label>
         <label className="check">
           <input type="checkbox" checked={borrador.precioEnExcel === true}
             onChange={(e) => setBorrador({ ...borrador, precioEnExcel: e.target.checked })} />
-          Incluir "Price Per episode" en el Excel (normalmente vacío: lo coloca la jefa)
+          Poner los precios en el Excel (déjalo apagado: los precios los pone la jefa)
         </label>
         <label>
           Nombre de la actividad por horas
@@ -79,8 +82,8 @@ export function AjustesPagina({ ajustes }: { ajustes: Ajustes }) {
       </section>
 
       <section className="tarjeta">
-        <h2>Tipos de trabajo y precios</h2>
-        <p className="ayuda">Precio por episodio y por idioma. Al registrar se sugiere el último precio usado para ese programa.</p>
+        <h2>Tipos de trabajo</h2>
+        <p className="ayuda">Solo cambia esto si te lo piden. El número es el pago por cada episodio en cada idioma.</p>
         {borrador.tipos.map((t) => (
           <div className="fila tipo" key={`${t.id}-${version}`}>
             <input value={t.nombre} onChange={(e) => cambiarTipo(t.id, { nombre: e.target.value })} aria-label="Nombre" />
@@ -88,7 +91,7 @@ export function AjustesPagina({ ajustes }: { ajustes: Ajustes }) {
               onChange={(e) => cambiarTipo(t.id, { precio: num(e.target.value) })} />
             <label className="check">
               <input type="checkbox" checked={t.porRango} onChange={(e) => cambiarTipo(t.id, { porRango: e.target.checked })} />
-              rango de eps
+              varios episodios
             </label>
             <button type="button" title="Quitar" onClick={() => setBorrador({ ...borrador, tipos: borrador.tipos.filter((x) => x.id !== t.id) })}>✕</button>
           </div>
@@ -105,14 +108,14 @@ export function AjustesPagina({ ajustes }: { ajustes: Ajustes }) {
       {aviso && <p className={aviso.startsWith('✓') ? 'ok' : 'error'}>{aviso}</p>}
 
       <section className="tarjeta">
-        <h2>Respaldo</h2>
+        <h2>Copia de seguridad</h2>
         <p className="ayuda">
-          Los datos se guardan solo en este navegador. Descarga un respaldo de vez en cuando (y antes de cambiar de
-          computadora o borrar el historial del navegador).
+          Lo que anotas se guarda solo en esta computadora. Descarga una copia una vez por semana, y antes de
+          cambiar de computadora o de borrar el historial del navegador.
         </p>
-        <button type="button" onClick={exportarRespaldo}>Descargar respaldo</button>
+        <button type="button" onClick={exportarRespaldo}>Descargar copia de seguridad</button>
         <label className="boton-archivo">
-          Restaurar desde respaldo…
+          Recuperar desde una copia…
           <input type="file" accept="application/json,.json" onChange={(e) => importarRespaldo(e.target.files?.[0])} />
         </label>
       </section>

@@ -5,15 +5,16 @@ import { AjustesPagina } from './ui/AjustesPagina';
 import { FormularioRegistro } from './ui/FormularioRegistro';
 import { ListaRegistros } from './ui/ListaRegistros';
 import { Resumen } from './ui/Resumen';
+import { respaldoVencido } from './ui/respaldo';
 import { inicioPeriodoAbierto, useAjustes, usePeriodos, useRegistros } from './ui/hooks';
 
 type Pagina = 'registrar' | 'registros' | 'resumen' | 'ajustes';
 
 const PAGINAS: { id: Pagina; nombre: string }[] = [
-  { id: 'registrar', nombre: 'Registrar' },
-  { id: 'registros', nombre: 'Registros' },
-  { id: 'resumen', nombre: 'Resumen' },
-  { id: 'ajustes', nombre: 'Ajustes' },
+  { id: 'registrar', nombre: '➕ Anotar' },
+  { id: 'registros', nombre: '📋 Mis trabajos' },
+  { id: 'resumen', nombre: '📄 Excel' },
+  { id: 'ajustes', nombre: '⚙ Ajustes' },
 ];
 
 export function App() {
@@ -30,13 +31,14 @@ export function App() {
 
   const inicio = inicioPeriodoAbierto(periodos, registros);
   const abiertos = registros.filter((r) => enRango(r, inicio, '9999-12-31'));
+  const respaldoPendiente = respaldoVencido();
   const hoyRegistros = registros.filter((r) => r.fecha === hoy());
 
   return (
     <div className="app">
       <header>
         <div>
-          <small>Periodo actual (desde {inicio})</small>
+          <small>Llevas en este periodo (desde el {inicio.split('-').reverse().join('/')})</small>
           <strong>{dinero(totalRegistros(abiertos, ajustes))}</strong>
         </div>
         <nav>
@@ -51,22 +53,40 @@ export function App() {
       <main>
         {pagina === 'registrar' && (
           <>
+            {registros.length === 0 && (
+              <section className="tarjeta bienvenida">
+                <h2>👋 ¡Hola! Así se usa:</h2>
+                <ol>
+                  <li><b>Anota</b> cada trabajo cuando lo termines (abajo, en esta pantalla).</li>
+                  <li>Cuando se acabe el periodo, ve a <b>📄 Excel</b>.</li>
+                  <li>Toca <b>Descargar mi Excel</b>. ¡Listo! Ya viene con el formato de siempre.</li>
+                </ol>
+              </section>
+            )}
+            {registros.length > 0 && respaldoPendiente && (
+              <section className="tarjeta alerta">
+                <b>💾 Guarda una copia de seguridad</b>
+                <p>Tus datos están solo en esta computadora. Descarga una copia para no perderlos.</p>
+                <button type="button" onClick={() => setPagina('ajustes')}>Ir a Ajustes → Copia de seguridad</button>
+              </section>
+            )}
             <section className="tarjeta">
+              <h2>Anotar un trabajo</h2>
               <FormularioRegistro ajustes={ajustes} historial={registros} />
             </section>
             <section className="tarjeta">
-              <h2>Hoy · {dinero(totalRegistros(hoyRegistros, ajustes))}</h2>
-              <ListaRegistros registros={hoyRegistros} historial={registros} ajustes={ajustes} vacio="Nada registrado hoy todavía." />
+              <h2>Lo que anotaste hoy</h2>
+              <ListaRegistros registros={hoyRegistros} historial={registros} ajustes={ajustes} vacio="Todavía no has anotado nada hoy." />
             </section>
           </>
         )}
         {pagina === 'registros' && (
           <section className="tarjeta">
-            <h2>Periodo actual · {abiertos.length} registros</h2>
-            <ListaRegistros registros={abiertos} historial={registros} ajustes={ajustes} vacio="No hay registros en el periodo actual." />
+            <h2>Mis trabajos de este periodo ({abiertos.length})</h2>
+            <ListaRegistros registros={abiertos} historial={registros} ajustes={ajustes} vacio="Aquí aparecerán los trabajos que anotes." />
             {registros.length > abiertos.length && (
               <details>
-                <summary>Periodos anteriores ({registros.length - abiertos.length})</summary>
+                <summary>Ver trabajos de periodos anteriores ({registros.length - abiertos.length})</summary>
                 <ListaRegistros registros={registros.filter((r) => r.fecha < inicio)} historial={registros} ajustes={ajustes} />
               </details>
             )}
