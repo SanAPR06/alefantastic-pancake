@@ -1,0 +1,136 @@
+/* Estilos básicos y funcionales. El diseño visual se trabaja en la fase 1.1. */
+:root {
+  --fondo: #f4f5f7;
+  --tarjeta: #ffffff;
+  --texto: #1d2129;
+  --suave: #6b7280;
+  --borde: #d6d9de;
+  --acento: #2f6fde;
+  --acento-texto: #ffffff;
+  --ok: #1a7f37;
+  --error: #c62828;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--texto);
+  background: var(--fondo);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fondo: #15171b;
+    --tarjeta: #1f2228;
+    --texto: #e6e8eb;
+    --suave: #9aa1ab;
+    --borde: #353a43;
+    --acento: #5b8ef0;
+  }
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--fondo); }
+
+.app { max-width: 720px; margin: 0 auto; padding: 0 16px 48px; }
+
+header {
+  position: sticky; top: 0; z-index: 1;
+  background: var(--fondo);
+  padding: 12px 0;
+  display: flex; flex-direction: column; gap: 10px;
+}
+header small { display: block; color: var(--suave); }
+header strong { font-size: 1.6rem; }
+nav { display: flex; gap: 4px; }
+nav button { flex: 1; }
+
+h2 { font-size: 1rem; margin: 0 0 12px; }
+
+.tarjeta {
+  background: var(--tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+button, input, select {
+  font: inherit;
+  color: inherit;
+}
+button {
+  background: var(--tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+button:disabled { opacity: .5; cursor: default; }
+button.activo, button.primario {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: var(--acento-texto);
+}
+button.primario { width: 100%; padding: 12px; font-weight: 600; margin: 8px 0; }
+
+input {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  background: var(--fondo);
+}
+input[type='checkbox'] { width: auto; }
+
+.formulario, .resumen { display: flex; flex-direction: column; gap: 12px; }
+.resumen .tarjeta > * + * { margin-top: 10px; }
+label, .campo { display: flex; flex-direction: column; gap: 4px; font-size: .9rem; color: var(--suave); }
+label input { color: var(--texto); }
+
+.fila { display: flex; gap: 10px; align-items: flex-end; }
+.fila > * { flex: 1; }
+.fila.tipo { align-items: center; margin-bottom: 6px; }
+.fila.tipo .corto { max-width: 80px; flex: none; }
+.fila.tipo button { flex: none; }
+label.check { flex-direction: row; align-items: center; flex: none; white-space: nowrap; }
+
+.segmentos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.segmentos button { padding: 10px 4px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips button { padding: 6px 10px; border-radius: 999px; }
+
+.avanzado summary { cursor: pointer; padding: 6px 0; }
+.avanzado[open] { display: flex; flex-direction: column; gap: 10px; }
+.avanzado small { color: var(--suave); }
+
+.ayuda { color: var(--suave); font-size: .85rem; margin: 0; }
+.ok { color: var(--ok); margin: 0; }
+.error { color: var(--error); margin: 0; }
+
+.lista { list-style: none; margin: 0; padding: 0; }
+.lista li {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid var(--borde);
+}
+.lista li:first-child { border-top: none; }
+.lista li.editando { flex-direction: column; align-items: stretch; }
+.lista .fecha { color: var(--suave); font-size: .85rem; width: 44px; flex: none; }
+.lista .info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.lista .info small { color: var(--suave); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lista .monto { font-weight: 600; }
+.lista .acciones { display: flex; gap: 2px; }
+.lista .acciones button { padding: 4px 8px; border: none; background: none; color: var(--suave); }
+
+.totales > div { display: flex; justify-content: space-between; padding: 4px 0; }
+.totales .gran-total { border-top: 1px solid var(--borde); margin-top: 4px; padding-top: 8px; font-size: 1.15rem; }
+
+.boton-archivo {
+  display: inline-block;
+  border: 1px solid var(--borde); border-radius: 8px; padding: 8px 12px; cursor: pointer; color: var(--texto);
+}
+.boton-archivo input { display: none; }
+
+@media (max-width: 480px) {
+  .segmentos { grid-template-columns: repeat(2, 1fr); }
+  .fila.tipo { flex-wrap: wrap; }
+}
+
+.version { position: fixed; right: 8px; bottom: 6px; font-size: .7rem; color: var(--suave); opacity: .7; pointer-events: none; }
