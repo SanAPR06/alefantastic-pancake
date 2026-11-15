@@ -37,9 +37,12 @@ export function App() {
   return (
     <div className="app">
       <header>
-        <div>
+        <div className="marca">
+          <img src="./logo.svg" alt="" width="44" height="44" />
+          <div>
           <small>Llevas en este periodo (desde el {inicio.split('-').reverse().join('/')})</small>
           <strong>{dinero(totalRegistros(abiertos, ajustes))}</strong>
+          </div>
         </div>
         <nav>
           {PAGINAS.map((p) => (

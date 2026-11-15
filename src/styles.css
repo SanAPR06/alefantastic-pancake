@@ -157,3 +157,6 @@ h2 { font-size: 1.15rem; }
 .lista .acciones button { border: 1px solid var(--borde); background: var(--tarjeta); color: var(--texto); min-height: 34px; padding: 2px 10px; font-size: .85rem; }
 .lista .acciones button.peligro { color: var(--error); }
 .lista .info small { white-space: normal; }
+
+.marca { display: flex; align-items: center; gap: 12px; }
+.marca img { border-radius: 10px; flex: none; }
